@@ -1,25 +1,74 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title: "Assignment1"
+output: md_document
 ---
+#Reading and processing data
+```{r readcsv, echo=TRUE}
+activity <- read.csv("activity.csv", stringsAsFactors = FALSE)
+```
+str(activity)
+```
+```{r setup, echo=TRUE}
+activity$date <- as.Date(activity$date)
+str(activity)
+```
 
-
-## Loading and preprocessing the data
-
-
-
-## What is mean total number of steps taken per day?
-
-
-
-## What is the average daily activity pattern?
-
-
-
-## Imputing missing values
-
-
-
-## Are there differences in activity patterns between weekdays and weekends?
+``````{r missing, echo=TRUE}
+sum(is.na(activity$steps))
+```
+##Mean total number of steps/day and histogram
+``````{r mean and histogram, echo=TRUE}
+activityrm<-activity[which(!is.na(activity$steps)),]
+perday<-tapply(activityrm$steps, activityrm$date, sum)
+hist(perday,10, main = "Total steps/day", xlab = "")
+``````
+##Average daily activity pattern
+``````{r average pattern and plot, echo=TRUE}
+dailyact<-tapply(activityrm$steps, activityrm$interval, mean)
+plot(y = dailyact, x = names(dailyact), type = "l", xlab = "5-Minute-Interval", 
+    main = "Daily Activity Pattern", ylab = "Average steps")
+dailyact[dailyact==max(dailyact)]
+``````
+##Imputing missing values
+``````{r NA values, echo=TRUE}
+sum(is.na(activity$steps))
+sum(is.na(activity))
+actnew <- activity
+actnew[which(is.na(actnew$steps)),1]<-
+dailyact[as.character(actnew[which(is.na(actnew$steps)),3])]
+sum(is.na(actnew))
+``````
+``````{r histogram, echo=TRUE}
+perday_new<-tapply(actnew$steps, actnew$date, sum)
+par(mfrow=c(1,2))
+hist(perday,10, main = "Total steps/ day", xlab = "Steps", ylim =c(0, 25))
+abline(v = median(perday), col = 4, lwd = 4)
+hist(perday_new,10, main = "Total steps/day (missing values represented by interval mean)", xlab = "Steps", ylim =c(0, 25))
+abline(v = median(perday_new), col = 4, lwd = 4)
+``````
+``````{r mean and median, echo=TRUE}
+mean(perday_new)
+median(perday_new)
+mean(perday_new)-mean(perday)
+median(perday_new)-median(perday)
+``````
+##Differences in activity patterns between weekdays and weekends
+``````{r factors, echo=TRUE}
+actnew$wd<-weekdays(actnew$date)
+actnew$fwd<- as.factor(c("weekend", "weekday"))
+actnew[actnew$wd == "Sunday" | actnew$wd == "Saturday" ,5]<- factor("weekend")
+actnew[!(actnew$wd == "Sunday" | actnew$wd == "Saturday"),5 ]<- factor("weekday")
+``````
+``````{r plot, echo=TRUE}
+actnew_we <- subset(actnew, fwd == "weekend")
+actnew_wd <- subset(actnew, fwd == "weekday") 
+dailyact_we<-tapply(actnew_we$steps, actnew_we$interval, mean)
+dailyact_wd<-tapply(actnew_wd$steps, actnew_wd$interval, mean)
+par(mfrow=c(2,1))
+plot(y = dailyact_wd, x = names(dailyact_wd), type = "l", xlab = "5-Minute Interval", 
+     main = "Daily Activity Pattern-Weekdays", ylab = "Average steps", 
+     ylim =c(0, 250))
+plot(y = dailyact_we, x = names(dailyact_we), type = "l", xlab = "5-Minute Interval", 
+     main = "Daily Activity Pattern-Weekends", ylab = "Average steps", 
+     ylim =c(0, 250))
+``````
