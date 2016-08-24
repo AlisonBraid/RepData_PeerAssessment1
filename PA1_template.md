@@ -1,9 +1,7 @@
 Reading and processing data
-===========================
+---------------------------
 
     activity <- read.csv("activity.csv", stringsAsFactors = FALSE)
-
-str(activity) \`\`\`
 
     activity$date <- as.Date(activity$date)
     str(activity)

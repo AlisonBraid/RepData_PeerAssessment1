@@ -1,13 +1,12 @@
 ---
 title: "Assignment1"
-output: md_document
+output: html_document
 ---
-#Reading and processing data
+##Reading and processing data
 ```{r readcsv, echo=TRUE}
 activity <- read.csv("activity.csv", stringsAsFactors = FALSE)
 ```
-str(activity)
-```
+
 ```{r setup, echo=TRUE}
 activity$date <- as.Date(activity$date)
 str(activity)
